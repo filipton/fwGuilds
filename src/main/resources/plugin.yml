@@ -1,0 +1,19 @@
+name: FwGuilds
+version: ${project.version}
+main: fw.fwguilds.FwGuilds
+api-version: 1.16
+prefix: fwGuilds
+load: STARTUP
+authors: [ filipton ]
+description: Yeah
+
+commands:
+  fwguilds:
+    description: fwGuilds main Command
+    usage: /fwguilds
+    aliases:
+      - fg
+      - g
+  baza:
+    description: Tp to bazy
+    usage: /baza
