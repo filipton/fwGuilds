@@ -95,6 +95,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new DeathAndDamageHandler(), this);
+        getServer().getPluginManager().registerEvents(new AntyLogout(), this);
 
         ReloadConfig();
     }
@@ -653,29 +654,26 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         ReloadTeams();
     }
 
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event){
-        //event.setQuitMessage(event.getQuitMessage() + " 12321321321");
-        event.getPlayer().setHealth(0.0);
-
-    }
-
     public void ManageTeam(String gName, ChatColor gColor){
         org.bukkit.scoreboard.Team guildTeam;
 
-        if(scoreboard.getTeam(gName) != null){
-            guildTeam = scoreboard.getTeam(gName);
+        if(scoreboard != null){
+            if(scoreboard.getTeam(gName) != null){
+                guildTeam = scoreboard.getTeam(gName);
+            }
+            else{
+                guildTeam = scoreboard.registerNewTeam(gName);
+            }
+
+            guildTeam.setColor(gColor);
+            guildTeam.setPrefix(ChatColor.GRAY + "" + ChatColor.BOLD + "[" + gColor + gName + ChatColor.GRAY + "" + ChatColor.BOLD + "] " + ChatColor.RESET);
+            guildTeam.setCanSeeFriendlyInvisibles(true);
+            guildTeam.setAllowFriendlyFire(true);
         }
         else{
-            guildTeam = scoreboard.registerNewTeam(gName);
+            scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+            if(scoreboard != null) ManageTeam(gName, gColor);
         }
-
-        //Prisoners.addEntry(player.getName());
-
-        guildTeam.setColor(gColor);
-        guildTeam.setPrefix(ChatColor.GRAY + "" + ChatColor.BOLD + "[" + gColor + gName + ChatColor.GRAY + "" + ChatColor.BOLD + "] " + ChatColor.RESET);
-        guildTeam.setCanSeeFriendlyInvisibles(true);
-        guildTeam.setAllowFriendlyFire(true);
     }
 
     public void ReloadTeams() {

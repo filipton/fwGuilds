@@ -1,11 +1,13 @@
 package fw.fwguilds;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,17 +18,17 @@ import java.util.List;
 import java.util.Random;
 
 public class DeathAndDamageHandler implements Listener {
+
     @EventHandler
-    public void onDamageEvent(EntityDamageEvent event){
+    public void onAttack(EntityDamageByEntityEvent event) {
         Entity victim = event.getEntity();
+        Entity damager = event.getDamager();
 
-        EntityDamageEvent lastCause = victim.getLastDamageCause();
-        if(lastCause != null){
-            Entity damager = (Entity) lastCause.getEntity();
-
-            if(victim instanceof Player && damager instanceof Player){
-                if(((Player) victim).getHealth() - event.getDamage() <= 0){
-                    //event.setCancelled(true);
+        if(victim instanceof Player && damager instanceof Player){
+            if(event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK){
+                if(victim instanceof Player && damager instanceof Player){
+                    AntyLogout.AddPlayerToAntyLogout((Player) damager);
+                    AntyLogout.AddPlayerToAntyLogout((Player) victim);
                 }
             }
         }
