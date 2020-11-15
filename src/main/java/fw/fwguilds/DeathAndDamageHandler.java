@@ -27,16 +27,16 @@ public class DeathAndDamageHandler implements Listener {
 
         if(victim instanceof Player && damager instanceof Player){
             if(event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK){
-                if(victim instanceof Player && damager instanceof Player){
-                    AntyLogout.AddPlayerToAntyLogout((Player) damager);
-                    AntyLogout.AddPlayerToAntyLogout((Player) victim);
-                }
+                AntyLogout.AddPlayerToAntyLogout((Player) damager);
+                AntyLogout.AddPlayerToAntyLogout((Player) victim);
             }
         }
     }
 
     @EventHandler
     public void onPlayerDeath (PlayerDeathEvent event){
+        PlayerKnockDown.UnKnockDownPlayer(event.getEntity());
+
         event.setKeepInventory(true);
         event.getDrops().clear();
 

@@ -94,6 +94,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new DeathAndDamageHandler(), this);
         getServer().getPluginManager().registerEvents(new AntyLogout(), this);
+        getServer().getPluginManager().registerEvents(new PlayerKnockDown(), this);
 
         ReloadConfig();
     }
@@ -383,30 +384,16 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                         }
                         break;
                     case "test":
-                        Player pl = ((Player)sender);
-                        //BlockData bd = getServer().getWorld("world").getBlockAt(pl.getLocation()).getBlockData();
-                        //BlockData bd = getServer().createBlockData(Material.BARRIER);
-                        //Location l = pl.getLocation();
-                        //l.setY(l.getBlockY()+1);
-
-                        Location l = pl.getLocation();
-                        l.setY(l.getBlockY() + 0.2);
-                        l.setPitch(0);
-                        pl.teleport(l);
-                        pl.setGliding(true);
-                        pl.setVelocity(new Vector(0.0, 0.0, 0.0));
-                        glide = true;
-
-                        //for(Player player : Bukkit.getOnlinePlayers()){
-                        //    if(pl != player){
-                        //        player.addPassenger(pl);
-                        //    }
-                        //}
-                        //ReloadTeams();
-                        //Bukkit.getScoreboardManager().getNewScoreboard().registerNewTeam("filipton");
-                        //ManageTeam("LOLZ", ChatColor.GREEN);
-                        //swim = true;
-                        //((Player)sender).setSwimming(true);
+                        PlayerKnockDown.KnockDownPlayer((Player)sender);
+                        break;
+                    case "test2":
+                        //XDDDDDDDDDDDDDDDDDDDDDDDDDDDD DONT TRY THIS XDDDD
+                        /*for(Player player : Bukkit.getOnlinePlayers()){
+                            if((Player)sender != player){
+                                ((Player)sender).addPassenger(player);
+                            }
+                        }*/
+                        PlayerKnockDown.UnKnockDownPlayer((Player)sender);
                         break;
                     default:
                     case "help":
@@ -671,31 +658,6 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         if(scoreboard == null) scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
         ReloadTeams();
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event){
-        if(glide){
-            Vector v = event.getPlayer().getVelocity();
-            event.getPlayer().setVelocity(new Vector(v.getX(), 0.0, v.getZ()));
-            //event.setCancelled(true);
-        }
-        //event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onPlayerGlide(EntityToggleGlideEvent event) {
-        if(glide && !event.isGliding()){
-            event.setCancelled(true);
-        }
-        /*if(swim){
-            if(!event.isSwimming()){
-                event.setCancelled(true);
-                ((Player)event.getEntity()).sendBl
-            }
-        }
-
-        Bukkit.broadcastMessage("XD3 " + event.isSwimming());*/
     }
 
     public void ManageTeam(String gName, ChatColor gColor){
