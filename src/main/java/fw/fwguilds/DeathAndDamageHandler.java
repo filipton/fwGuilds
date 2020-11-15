@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -36,8 +37,8 @@ public class DeathAndDamageHandler implements Listener {
 
     @EventHandler
     public void onPlayerDeath (PlayerDeathEvent event){
-        //ala keepinventory
-        //event.getEntity().sendMessage(event.getDrops().size() + "");
+        event.setKeepInventory(true);
+        event.getDrops().clear();
 
         event.getEntity().sendMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "UMARLES NA POZYCJI X: " + event.getEntity().getLocation().getBlockX() + ", Y: " + event.getEntity().getLocation().getBlockY() + ", Z: " + event.getEntity().getLocation().getBlockZ());
 
@@ -132,5 +133,6 @@ public class DeathAndDamageHandler implements Listener {
         skull.setItemMeta(meta);
 
         event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), skull);
+        return;
     }
 }

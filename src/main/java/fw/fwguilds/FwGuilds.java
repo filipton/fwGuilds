@@ -13,6 +13,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -26,13 +27,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -64,6 +60,8 @@ public final class FwGuilds extends JavaPlugin implements Listener {
     static boolean OpBypass = false;
     static boolean ActiveHalfDrop = true;
     static boolean ActiveGuildsSystem = true;
+
+    public boolean glide = false;
 
     @Override
     public void onEnable() {
@@ -385,9 +383,30 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                         }
                         break;
                     case "test":
+                        Player pl = ((Player)sender);
+                        //BlockData bd = getServer().getWorld("world").getBlockAt(pl.getLocation()).getBlockData();
+                        //BlockData bd = getServer().createBlockData(Material.BARRIER);
+                        //Location l = pl.getLocation();
+                        //l.setY(l.getBlockY()+1);
+
+                        Location l = pl.getLocation();
+                        l.setY(l.getBlockY() + 0.2);
+                        l.setPitch(0);
+                        pl.teleport(l);
+                        pl.setGliding(true);
+                        pl.setVelocity(new Vector(0.0, 0.0, 0.0));
+                        glide = true;
+
+                        //for(Player player : Bukkit.getOnlinePlayers()){
+                        //    if(pl != player){
+                        //        player.addPassenger(pl);
+                        //    }
+                        //}
                         //ReloadTeams();
                         //Bukkit.getScoreboardManager().getNewScoreboard().registerNewTeam("filipton");
                         //ManageTeam("LOLZ", ChatColor.GREEN);
+                        //swim = true;
+                        //((Player)sender).setSwimming(true);
                         break;
                     default:
                     case "help":
@@ -652,6 +671,31 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         if(scoreboard == null) scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
         ReloadTeams();
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event){
+        if(glide){
+            Vector v = event.getPlayer().getVelocity();
+            event.getPlayer().setVelocity(new Vector(v.getX(), 0.0, v.getZ()));
+            //event.setCancelled(true);
+        }
+        //event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerGlide(EntityToggleGlideEvent event) {
+        if(glide && !event.isGliding()){
+            event.setCancelled(true);
+        }
+        /*if(swim){
+            if(!event.isSwimming()){
+                event.setCancelled(true);
+                ((Player)event.getEntity()).sendBl
+            }
+        }
+
+        Bukkit.broadcastMessage("XD3 " + event.isSwimming());*/
     }
 
     public void ManageTeam(String gName, ChatColor gColor){
