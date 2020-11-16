@@ -70,6 +70,8 @@ public class PlayerKnockDown implements Listener {
         p.setGliding(true);
         p.setVelocity(new Vector(0.0, 0.0, 0.0));
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 1200, 255,false, false));
+        p.setWalkSpeed(0);
+        p.setFlySpeed(0);
 
         BukkitTask bt = new BukkitRunnable() {
             int i = 0;
@@ -95,6 +97,8 @@ public class PlayerKnockDown implements Listener {
     public static void UnKnockDownPlayer(Player p){
         if(KnockedDownPlayers.containsKey(p)){
             p.removePotionEffect(PotionEffectType.SLOW);
+            p.setWalkSpeed(0.19f);
+            p.setFlySpeed(0.19f);
             if(KnockedDownPlayersCoutDownTasks.containsKey(p)){
                 KnockedDownPlayersCoutDownTasks.get(p).cancel();
                 KnockedDownPlayersCoutDownTasks.remove(p);
