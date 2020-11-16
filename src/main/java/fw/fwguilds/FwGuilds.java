@@ -383,8 +383,19 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                             sender.sendMessage(ChatColor.GREEN + "===============================================");
                         }
                         break;
-                    case "test":
-                        PlayerKnockDown.KnockDownPlayer((Player)sender);
+                    case "ozyw":
+                        if(sender.isOp()){
+                            Player player;
+                            if(args.length == 2){
+                                player = Bukkit.getPlayer(args[1]);
+                            }
+                            else {
+                                player = (Player) sender;
+                            }
+
+                            PlayerKnockDown.UnKnockDownPlayer(player);
+                        }
+
                         break;
                     case "test2":
                         //XDDDDDDDDDDDDDDDDDDDDDDDDDDDD DONT TRY THIS XDDDD
@@ -393,7 +404,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                                 ((Player)sender).addPassenger(player);
                             }
                         }*/
-                        PlayerKnockDown.UnKnockDownPlayer((Player)sender);
+                        //PlayerKnockDown.UnKnockDownPlayer((Player)sender);
                         break;
                     default:
                     case "help":
@@ -475,6 +486,70 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                 }
             }.runTaskTimer(getPlugin(this.getClass()), 0, 20);
             return true;
+        }
+        else if(command.getName().equalsIgnoreCase("ucieczka")){
+            boolean memberHasGuild = false;
+            Guild g = new Guild();
+            double closestDistance = 10000;
+
+            Player p = (Player)sender;
+            Vector pos = new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ());
+            double hp = p.getHealth();
+
+            for(Map.Entry<String, Guild> guild : Guilds.entrySet()) {
+                double dist = pos.distance(guild.getValue().CuboidBlockPosition);
+                if(dist < closestDistance){
+                    closestDistance = dist;
+                }
+
+                for(String member : guild.getValue().members){
+                    if(p.getName().equalsIgnoreCase(member)){
+                        memberHasGuild = true;
+                        g = guild.getValue();
+                    }
+                }
+            }
+
+            if(closestDistance <= 100){
+                boolean finalMemberHasGuild = memberHasGuild;
+                Guild finalG = g;
+                new BukkitRunnable() {
+                    int i = 0;
+
+                    @Override
+                    public void run() {
+                        ActionBarMessage(p, ChatColor.YELLOW + "" + ChatColor.BOLD + "UCIEKASZ DO BAZY ZA: " + ChatColor.GREEN + "" + ChatColor.BOLD + (120-i) + " sekund!");
+
+                        if (i < 119) {
+                            if (!pos.equals(new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ()))) {
+                                ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "RUSZYLES SIE Z MIEJSCA WIEC NIE PRZETELEPORTOWALO CIE!");
+                                this.cancel();
+                            }
+                            else if(hp > p.getHealth()){
+                                ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "DOSTALES JAKIS DAMAGE WIEC NIE PRZETELEPORTOWALO CIE!");
+                                this.cancel();
+                            }
+                        } else if (i == 120) {
+                            ActionBarMessage(p, ChatColor.GREEN + "" + ChatColor.BOLD + "UCIEKLES DO BAZY!");
+                            p.teleport(new Location(getServer().getWorld("world"), finalG.CuboidBlockPosition.getBlockX() + 0.5, finalG.CuboidBlockPosition.getBlockY()+1, finalG.CuboidBlockPosition.getBlockZ() + 0.5, p.getLocation().getYaw(), p.getLocation().getPitch()));
+                            this.cancel();
+                        }
+                        i++;
+
+                        if(!finalMemberHasGuild){
+                            ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "NIE JESTES AKTUALNIE W GILDII!");
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(getPlugin(this.getClass()), 0, 20);
+                return true;
+            }
+            ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "NIE MOZESZ ZACZAC UCIECZKI DO BAZY NIE BEDAC NA TERENIE JAKIEJKOLWIEK GILDII!");
+
+            return true;
+        }
+        else if(command.getName().equalsIgnoreCase("samobojstwo")){
+            PlayerKnockDown.KnockDownPlayer((Player) sender);
         }
         return false;
     }

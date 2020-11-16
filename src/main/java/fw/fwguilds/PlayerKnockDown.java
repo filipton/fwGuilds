@@ -2,10 +2,7 @@ package fw.fwguilds;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.boss.BarColor;
@@ -84,26 +81,6 @@ public class PlayerKnockDown implements Listener {
         }
     }
 
-    public static Entity getNearestEntityInSight(Player player, int range) {
-        ArrayList<Entity> entities = (ArrayList<Entity>) player.getNearbyEntities(range, range, range);
-        ArrayList<Block> sightBlock = (ArrayList<Block>) player.getLineOfSight( (Set<Material>) null, range);
-        ArrayList<Location> sight = new ArrayList<Location>();
-        for (int i = 0;i<sightBlock.size();i++)
-            sight.add(sightBlock.get(i).getLocation());
-        for (int i = 0;i<sight.size();i++) {
-            for (int k = 0;k<entities.size();k++) {
-                if (Math.abs(entities.get(k).getLocation().getX()-sight.get(i).getX())<1.3) {
-                    if (Math.abs(entities.get(k).getLocation().getY()-sight.get(i).getY())<1.5) {
-                        if (Math.abs(entities.get(k).getLocation().getZ()-sight.get(i).getZ())<1.3) {
-                            return entities.get(k);
-                        }
-                    }
-                }
-            }
-        }
-        return null; //Return null/nothing if no entity was found
-    }
-
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e){
         PlayerKnockDown.UnKnockDownPlayer(e.getPlayer());
@@ -178,20 +155,30 @@ public class PlayerKnockDown implements Listener {
                 Player p = (Player) e.getRightClicked();
 
                 if(!RevivingPlayers.containsKey(e.getPlayer())){
+                    if(e.getPlayer().getLevel() < 5){
+                        e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.RED + "NIE MASZ WYSTARCZAJACEGO LEWELU ABY PODNIESC GRACZA!"));
+                        return;
+                    }
+
                     BukkitTask bt = new BukkitRunnable() {
                         @Override
                         public void run() {
-                            if(getNearestEntityInSight(e.getPlayer(), 1) != e.getRightClicked() || !e.getPlayer().isSneaking()) {
+                            if(!(getLookingAt(e.getPlayer(), p) && e.getPlayer().getLocation().distance(p.getLocation()) <= 2) || !e.getPlayer().isSneaking()) {
                                 RevivingPlayers.remove(e.getPlayer());
                                 KnockedDownPlayers.replace(p, 0);
                                 this.cancel();
+                                return;
                             }
 
 
                             if(KnockedDownPlayers.containsKey(p)){
                                 KnockedDownPlayers.replace(p, KnockedDownPlayers.get(p)+1);
 
-                                e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("PODNOSZENIE: " + Math.round(KnockedDownPlayers.get(p) * 100.0/100.0) + "%"));
+                                if(KnockedDownPlayers.get(p) % 20 == 0){
+                                    e.getPlayer().setLevel(e.getPlayer().getLevel()-1);
+                                }
+
+                                e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("PODNOSZENIE: " + KnockedDownPlayers.get(p) + "%"));
                                 p.sendTitle("ZOSTALES POWALONY", "JESTES PODNOSZONY: " + Math.round(KnockedDownPlayers.get(p) * 100.0/100.0) + "%", 0, 20, 10);
 
                                 if(KnockedDownPlayers.get(p) >= 100){
@@ -206,6 +193,14 @@ public class PlayerKnockDown implements Listener {
                 }
             }
         }
+    }
+
+    private boolean getLookingAt(Player player, Player player1) {
+        Location eye = player.getEyeLocation();
+        Vector toEntity = player1.getEyeLocation().toVector().subtract(eye.toVector());
+        double dot = toEntity.normalize().dot(eye.getDirection());
+
+        return dot > 0.94D;
     }
 
     public boolean isNextBlock(Location from, Location to) {

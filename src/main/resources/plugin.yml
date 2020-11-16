@@ -17,3 +17,9 @@ commands:
   baza:
     description: Tp to bazy
     usage: /baza
+  ucieczka:
+    description: Ucieczka z bazy przeciwnika
+    usage: /ucieczka
+  samobojstwo:
+    description: Wykonujesz samobojstwo
+    usage: /samobojstwo
