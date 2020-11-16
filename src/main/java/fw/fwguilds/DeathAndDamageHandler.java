@@ -35,8 +35,6 @@ public class DeathAndDamageHandler implements Listener {
 
     @EventHandler
     public void onPlayerDeath (PlayerDeathEvent event){
-        PlayerKnockDown.UnKnockDownPlayer(event.getEntity());
-
         event.setKeepInventory(true);
         event.getDrops().clear();
 
