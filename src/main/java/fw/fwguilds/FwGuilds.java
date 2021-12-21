@@ -27,6 +27,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
@@ -67,6 +68,8 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
             new PAPIExp(this).register();
         }
+
+        CustomEnchants.register();
 
         //put default values into hashmap Drops
         Drops.put("EXP", 50.0);
@@ -403,6 +406,12 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                         }
 
                         break;
+                    case "test":
+                        CustomEnchants.AddEnchantment(((Player)sender).getInventory().getItemInMainHand(), CustomEnchants.DROPPROTECTION, 1);
+                        break;
+                    case "test2":
+                        CustomEnchants.RemoveEnchantment(((Player)sender).getInventory().getItemInMainHand(), CustomEnchants.DROPPROTECTION);
+                        break;
                     default:
                     case "help":
                         sender.sendMessage(ChatColor.GREEN + "=================== FWGUILDS HELP ====================");
@@ -490,7 +499,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
             double closestDistance = 10000;
 
             Player p = (Player)sender;
-            Vector pos = new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ());
+            Vector pos = p.getLocation().toVector();
             double hp = p.getHealth();
 
             for(Map.Entry<String, Guild> guild : Guilds.entrySet()) {
@@ -547,6 +556,16 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         }
         else if(command.getName().equalsIgnoreCase("samobojstwo")){
             PlayerKnockDown.KnockDownPlayer((Player) sender);
+        }
+        else if(command.getName().equalsIgnoreCase("potwierdz-zgon")){
+            if(PlayerKnockDown.KnockedDownPlayers.containsKey(((Player)sender))){
+                ((Player)sender).setHealth(0.0);
+            }
+            else{
+                sender.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "Nie mozesz potwierdzic zgonu nie lezac!");
+            }
+
+            return true;
         }
         return false;
     }

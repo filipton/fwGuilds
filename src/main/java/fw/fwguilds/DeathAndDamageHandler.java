@@ -60,13 +60,20 @@ public class DeathAndDamageHandler implements Listener {
                 }
             }
 
-            Collections.shuffle(itemsIds);
+            Collections.shuffle(itemsIds, new Random(System.nanoTime()));
 
             for(int iId = 0; iId < itemsIds.size()/2; iId++){
                 ItemStack item = player.getInventory().getContents()[itemsIds.get(iId)];
 
-                player.getInventory().setItem(itemsIds.get(iId), null);
-                player.getWorld().dropItemNaturally(player.getLocation(), item);
+                if(!item.getItemMeta().hasEnchant(CustomEnchants.DROPPROTECTION)){
+                    player.getInventory().setItem(itemsIds.get(iId), null);
+                    player.getWorld().dropItemNaturally(player.getLocation(), item);
+                }
+                else{
+                    player.sendMessage(ChatColor.GREEN + "Enchant Drop Protection uratowal ci " + ChatColor.RED + "" + ChatColor.BOLD +
+                            (item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name().replace("_", " ")));
+                    CustomEnchants.RemoveEnchantment(item, CustomEnchants.DROPPROTECTION);
+                }
             }
         }
 
