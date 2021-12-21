@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -21,6 +22,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -33,7 +35,7 @@ import static org.bukkit.plugin.java.JavaPlugin.getPlugin;
 
 public class PlayerKnockDown implements Listener {
     public static HashMap<Player, Integer> KnockedDownPlayers = new HashMap<>();
-    public static HashMap<Player, BukkitTask> KnockedDownPlayersCoutDownTasks = new HashMap<>();
+    public static HashMap<Player, BukkitTask> KnockedDownPlayersCountDownTasks = new HashMap<>();
     public static HashMap<Player, Player> RevivingPlayers = new HashMap<>();
 
     public static int KnockDownTime = 30;
@@ -66,16 +68,16 @@ public class PlayerKnockDown implements Listener {
                 }
             }
         }.runTaskTimer(getPlugin(FwGuilds.class), 0, 20);
-        KnockedDownPlayersCoutDownTasks.put(p, bt);
+        KnockedDownPlayersCountDownTasks.put(p, bt);
     }
 
     public static void UnKnockDownPlayer(Player p){
         if(KnockedDownPlayers.containsKey(p)){
             p.removePotionEffect(PotionEffectType.SLOW);
             endPose(p);
-            if(KnockedDownPlayersCoutDownTasks.containsKey(p)){
-                KnockedDownPlayersCoutDownTasks.get(p).cancel();
-                KnockedDownPlayersCoutDownTasks.remove(p);
+            if(KnockedDownPlayersCountDownTasks.containsKey(p)){
+                KnockedDownPlayersCountDownTasks.get(p).cancel();
+                KnockedDownPlayersCountDownTasks.remove(p);
             }
             KnockedDownPlayers.remove(p);
         }
@@ -94,7 +96,7 @@ public class PlayerKnockDown implements Listener {
             final Block old = e.getFrom().getBlock().getRelative(BlockFace.UP);
             if (next.getType().equals((Object)Material.AIR) || !next.getType().isSolid()) {
                 if (!next.isLiquid() && !e.getTo().getBlock().isLiquid()) {
-                    p.sendBlockChange(next.getLocation(), Material.BARRIER, (byte)0);
+                    p.sendBlockChange(next.getLocation(), Bukkit.createBlockData(Material.BARRIER));
                 }
                 p.sendBlockChange(old.getLocation(), old.getBlockData());
             }
@@ -214,7 +216,7 @@ public class PlayerKnockDown implements Listener {
         p.setSwimming(true);
         p.setSprinting(true);
         final Block b = p.getLocation().getBlock().getRelative(BlockFace.UP);
-        p.sendBlockChange(b.getLocation(), Material.BARRIER, (byte) 0);
+        p.sendBlockChange(b.getLocation(), Bukkit.createBlockData(Material.BARRIER));
         p.setGameMode(GameMode.ADVENTURE);
         p.setWalkSpeed(0);
         final Entity vehicle = p.getVehicle();
@@ -231,7 +233,7 @@ public class PlayerKnockDown implements Listener {
         p.setSwimming(false);
         p.setSprinting(false);
         final Block b = p.getLocation().getBlock().getRelative(BlockFace.UP);
-        p.sendBlockChange(b.getLocation(), b.getType(), b.getData());
+        p.sendBlockChange(b.getLocation(), b.getBlockData());
         double health = 10;
         p.setHealth(health);
     }

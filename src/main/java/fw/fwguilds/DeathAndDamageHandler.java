@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -43,82 +44,27 @@ public class DeathAndDamageHandler implements Listener {
         if(FwGuilds.ActiveHalfDrop){
             Player player = event.getEntity();
 
-            //xp
-            //((ExperienceOrb)player.getWorld().spawn(player.getLocation(), ExperienceOrb.class)).setExperience(getExpAtLevel(player.getLevel())/3);
             player.setExp(0);
             player.setLevel(0);
 
-            //armors
-            List<ItemStack> itemsInArmorPlayer = new ArrayList<>();
-            Random rand = new Random();
+            //HALF DROP BETTER WAY
+            List<Integer> itemsIds = new ArrayList<>();
 
-            for (ItemStack i : player.getInventory().getArmorContents()) {
-                if (i != null) {
-                    itemsInArmorPlayer.add(i);
+            for(int i = 0; i < player.getInventory().getContents().length; i++){
+                ItemStack is = player.getInventory().getContents()[i];
+
+                if(is != null){
+                    itemsIds.add(i);
                 }
             }
 
-            int ArmorToDrop = itemsInArmorPlayer.size()/2;
-            if(itemsInArmorPlayer.size() == 1) ArmorToDrop = 1;
+            Collections.shuffle(itemsIds);
 
-            for (int i = 0; i < ArmorToDrop; i++) {
-                if(itemsInArmorPlayer.size() >= 1) {
-                    int rng = rand.nextInt(itemsInArmorPlayer.size());
+            for(int iId = 0; iId < itemsIds.size()/2; iId++){
+                ItemStack item = player.getInventory().getContents()[itemsIds.get(iId)];
 
-                    ItemStack itm = itemsInArmorPlayer.get(rng);
-
-                    if(itm != null) {
-                        if(itm.equals(player.getInventory().getHelmet())) {
-                            player.getInventory().setHelmet(null);
-                            player.getWorld().dropItemNaturally(player.getLocation(), itm);
-                        }
-                        else if(itm.equals(player.getInventory().getChestplate())) {
-                            player.getInventory().setChestplate(null);
-                            player.getWorld().dropItemNaturally(player.getLocation(), itm);
-                        }
-                        else if(itm.equals(player.getInventory().getLeggings())) {
-                            player.getInventory().setLeggings(null);
-                            player.getWorld().dropItemNaturally(player.getLocation(), itm);
-                        }
-                        else if(itm.equals(player.getInventory().getBoots())) {
-                            player.getInventory().setBoots(null);
-                            player.getWorld().dropItemNaturally(player.getLocation(), itm);
-                        }
-                        itemsInArmorPlayer.remove(rng);
-                    }
-                }
-            }
-
-            //items in eq
-            List<ItemStack> itemsInPlayer = new ArrayList<>();
-
-            rand = new Random();
-
-            for (ItemStack i : player.getInventory().getContents()) {
-                if (i != null) {
-                    itemsInPlayer.add(i);
-                }
-            }
-
-            itemsInPlayer.removeAll(itemsInArmorPlayer);
-
-            int ItemsToDrop = itemsInPlayer.size()/2;
-            if(itemsInPlayer.size() == 1) ItemsToDrop = 1;
-
-            for (int i = 0; i < ItemsToDrop; i++) {
-                int randomIndex = rand.nextInt(itemsInPlayer.size());
-                ItemStack randomItem = itemsInPlayer.get(randomIndex);
-
-                if(randomItem.equals(player.getInventory().getItemInOffHand())) {
-                    player.getInventory().setItemInOffHand(null);
-                    player.getWorld().dropItemNaturally(player.getLocation(), randomItem);
-                }
-                else{
-                    player.getWorld().dropItemNaturally(player.getLocation(), randomItem);
-                    player.getInventory().removeItem(randomItem);
-                }
-
-                itemsInPlayer.remove(randomIndex);
+                player.getInventory().setItem(itemsIds.get(iId), null);
+                player.getWorld().dropItemNaturally(player.getLocation(), item);
             }
         }
 

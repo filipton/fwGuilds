@@ -38,10 +38,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 public final class FwGuilds extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
-    static File cfile;
+    static File configFile;
 
     static Scoreboard scoreboard;
 
@@ -60,8 +61,6 @@ public final class FwGuilds extends JavaPlugin implements Listener {
     static boolean OpBypass = false;
     static boolean ActiveHalfDrop = true;
     static boolean ActiveGuildsSystem = true;
-
-    public boolean glide = false;
 
     @Override
     public void onEnable() {
@@ -89,7 +88,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         config.addDefault("guildsSystem", true);
         config.options().copyDefaults(true);
         saveConfig();
-        cfile = new File(getDataFolder(), "config.yml");
+        configFile = new File(getDataFolder(), "config.yml");
 
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new DeathAndDamageHandler(), this);
@@ -100,9 +99,9 @@ public final class FwGuilds extends JavaPlugin implements Listener {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender,
+    public boolean onCommand(@NotNull CommandSender sender,
                              Command command,
-                             String label,
+                             @NotNull String label,
                              String[] args) {
         if (command.getName().equalsIgnoreCase("fwguilds") || command.getAliases().contains("fg") || command.getAliases().contains("g")) {
             if(args.length > 0){
@@ -155,12 +154,18 @@ public final class FwGuilds extends JavaPlugin implements Listener {
 
                                 ItemStack cuboidIS = new ItemStack(Material.CRYING_OBSIDIAN);
                                 ItemMeta cuboid = cuboidIS.getItemMeta();
-                                cuboid.setDisplayName(ChatColor.AQUA + "CUBOID");
+                                Objects.requireNonNull(cuboid)
+                                        .setDisplayName(ChatColor.AQUA + "CUBOID");
+
                                 List<String> lore = new ArrayList<>();
                                 lore.add("CUBOID");
                                 cuboid.setLore(lore);
                                 cuboidIS.setItemMeta(cuboid);
-                                sender.getServer().getPlayer(sender.getName()).getInventory().addItem(cuboidIS);
+
+                                Objects.requireNonNull(
+                                        sender.getServer().getPlayer(sender.getName())
+                                ).getInventory().addItem(cuboidIS);
+
                                 sender.sendMessage(ChatColor.YELLOW + "POSTAW BLOK CUBOIDU ZEBY UTWORZYC GILDIE!");
                                 GuildWaiter gw = new GuildWaiter();
                                 gw.ownerPlayer = (Player) sender;
@@ -170,7 +175,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                                 SaveConfigRemastered();
                             }
                             else{
-                                sender.sendMessage(ChatColor.RED + "ZEBY UTWORZYC GILDIE POTRZEBUJESZ: 5 BLOKOW DIAMENTOW, 3 BLOKOW ZOTA, 1 OBSYDIAN!");
+                                sender.sendMessage(ChatColor.RED + "ZEBY UTWORZYC GILDIE POTRZEBUJESZ: 5 BLOKOW DIAMENTOW, 3 BLOKOW ZLOTA, 1 OBSYDIAN!");
                             }
                         }
                         else {
@@ -261,13 +266,11 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                                     }
 
                                     sender.sendMessage(ChatColor.RED + "TEN GRACZ NIE JEST AKTUALNIE W TWOJEJ GILDII!");
-                                    return true;
                                 }
                                 else{
                                     sender.sendMessage(ChatColor.RED + "MUSISZ PODAC JAKIEGO GRACZA CHCESZ USUNAC! /fg usun-gracza <gracz>");
-
-                                    return true;
                                 }
+                                return true;
                             }
                         }
                         sender.sendMessage(ChatColor.RED + "MUSISZ BYC WLASCICIELEM TEJ GILDII ABY USUNAC Z NIEJ GRACZA!");
@@ -296,7 +299,10 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                             if(dwg.ownerPlayer.equals(sender)){
                                 for(Map.Entry<String, Guild> guild : Guilds.entrySet()){
                                     if(guild.getKey().equalsIgnoreCase(dwg.GuildName)){
-                                        getServer().getWorld("world").getBlockAt(guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockY(), guild.getValue().CuboidBlockPosition.getBlockZ()).setType(Material.AIR);
+
+                                        Objects.requireNonNull(getServer().getWorld("world")).getBlockAt(
+                                                guild.getValue().CuboidBlockPosition.toLocation(Objects.requireNonNull(getServer().getWorld("world")))
+                                        ).setType(Material.AIR);
 
                                         Guilds.remove(guild.getKey());
                                         deleteGuildWaiters.remove(dwg);
@@ -397,15 +403,6 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                         }
 
                         break;
-                    case "test2":
-                        //XDDDDDDDDDDDDDDDDDDDDDDDDDDDD DONT TRY THIS XDDDD
-                        /*for(Player player : Bukkit.getOnlinePlayers()){
-                            if((Player)sender != player){
-                                ((Player)sender).addPassenger(player);
-                            }
-                        }*/
-                        //PlayerKnockDown.UnKnockDownPlayer((Player)sender);
-                        break;
                     default:
                     case "help":
                         sender.sendMessage(ChatColor.GREEN + "=================== FWGUILDS HELP ====================");
@@ -432,7 +429,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
             double closestDistance = 10000;
 
             Player p = (Player)sender;
-            Vector pos = new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ());
+            Vector pos = p.getLocation().toVector();
             double hp = p.getHealth();
 
             for(Map.Entry<String, Guild> guild : Guilds.entrySet()) {
@@ -464,7 +461,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                     ActionBarMessage(p, ChatColor.YELLOW + "" + ChatColor.BOLD + "TELEPORTUJESZ SIE DO BAZY ZA: " + ChatColor.GREEN + "" + ChatColor.BOLD + (15-i) + " sekund!");
 
                     if (i < 14) {
-                        if (!pos.equals(new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ()))) {
+                        if (!pos.equals(p.getLocation().toVector())) {
                             ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "RUSZYLES SIE Z MIEJSCA WIEC NIE PRZETELEPORTOWALO CIE!");
                             this.cancel();
                         }
@@ -521,7 +518,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                         ActionBarMessage(p, ChatColor.YELLOW + "" + ChatColor.BOLD + "UCIEKASZ DO BAZY ZA: " + ChatColor.GREEN + "" + ChatColor.BOLD + (120-i) + " sekund!");
 
                         if (i < 119) {
-                            if (!pos.equals(new Vector().setX(p.getLocation().getBlockX()).setY(p.getLocation().getBlockY()).setZ(p.getLocation().getBlockZ()))) {
+                            if (!pos.equals(p.getLocation().toVector())) {
                                 ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "RUSZYLES SIE Z MIEJSCA WIEC NIE PRZETELEPORTOWALO CIE!");
                                 this.cancel();
                             }
@@ -563,8 +560,13 @@ public final class FwGuilds extends JavaPlugin implements Listener {
             if(b.getType().equals(Material.CRYING_OBSIDIAN)){
                 for(Map.Entry<String, Guild> guild : Guilds.entrySet()){
                     Vector cpos = guild.getValue().CuboidBlockPosition;
-                    if(cpos.getBlockX() == b.getX() && cpos.getBlockY() == b.getY() && cpos.getBlockZ() == b.getZ()){
-                        ActionBarMessage(p, ChatColor.RED + "AKTUALNIE PSUCIE SERC GILDII JEST WYLACZONE!");
+                    if(b.getLocation().toVector().equals(cpos)){
+                        if(guild.getValue().Owner.equalsIgnoreCase(p.getName())){
+                            ActionBarMessage(p, ChatColor.RED + "ZEBY USUNAC GILDIE NALEZY WPISAC: /fg usun");
+                        }
+                        else{
+                            ActionBarMessage(p, ChatColor.RED + "AKTUALNIE PSUCIE SERC GILDII JEST WYLACZONE!");
+                        }
                         event.setCancelled(true);
                     }
                 }
@@ -575,7 +577,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                     if(!CanInteract(event.getBlock(), guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockZ())) {
                         if(!(guild.getValue().Owner.equalsIgnoreCase(p.getName()) || guild.getValue().members.contains(p.getName()))){
                             event.setCancelled(true);
-                            ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "Nie możesz tutaj niszczyć bo to teren gildii " + ChatColor.YELLOW + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
+                            ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "Nie możesz tutaj niszczyć bo to teren gildii " + guild.getValue().TeamColor + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
                             return;
                         }
                     }
@@ -592,18 +594,9 @@ public final class FwGuilds extends JavaPlugin implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player p = event.getPlayer();
 
-        if(ActiveGuildsSystem && (OpBypass || !p.isOp())){
-            for(Map.Entry<String, Guild> guild : Guilds.entrySet()){
-                if(guild != null){
-                    if(!CanInteract(event.getBlock(), guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockZ())) {
-                        if(!(guild.getValue().Owner.equalsIgnoreCase(p.getName()) || guild.getValue().members.contains(p.getName()))){
-                            event.setCancelled(true);
-                            ActionBarMessage(p, ChatColor.RED + "" + ChatColor.BOLD + "Nie możesz tutaj budować bo to teren gildii " + ChatColor.YELLOW + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
-                            return;
-                        }
-                    }
-                }
-            }
+        if(!InteractionOnGuildEvent(p, event.getBlock())){
+            event.setCancelled(true);
+            return;
         }
 
         if(event.getItemInHand().hasItemMeta()){
@@ -612,7 +605,10 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                 return;
             }
 
-            List<String> lore = event.getItemInHand().getItemMeta().getLore();
+            List<String> lore = Objects.requireNonNull(
+                    event.getItemInHand().getItemMeta()
+            ).getLore();
+
             Block b = event.getBlock();
             if(lore != null && lore.size() > 0){
                 if(lore.get(0).contains("CUBOID")){
@@ -641,23 +637,34 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         }
     }
 
-    public void SendMessageToallPlayers(String msg){
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(msg);
+    @EventHandler
+    public void onPlayerBucketFillEvent(PlayerBucketFillEvent event){
+        if(!InteractionOnGuildEvent(event.getPlayer(), event.getBlock())){
+            event.setCancelled(true);
         }
     }
-    public void ActionBarMessage(Player p, String msg){
-        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(msg));
+
+    @EventHandler
+    public void onPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event){
+        if(!InteractionOnGuildEvent(event.getPlayer(), event.getBlock())){
+            event.setCancelled(true);
+        }
     }
-    
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if(scoreboard == null) scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
+
+        ReloadTeams();
+    }
+
     public void DropFromStone(BlockBreakEvent event) {
         Player p = event.getPlayer();
         ItemStack itemInMainHand = p.getInventory().getItemInMainHand();
 
-        if(itemInMainHand != null &&
-                (itemInMainHand.getType().equals(Material.IRON_PICKAXE) ||
+        if(itemInMainHand.getType().equals(Material.IRON_PICKAXE) ||
                         itemInMainHand.getType().equals(Material.DIAMOND_PICKAXE) ||
-                        itemInMainHand.getType().equals(Material.NETHERITE_PICKAXE)))
+                        itemInMainHand.getType().equals(Material.NETHERITE_PICKAXE))
         {
             double fortMultiplier = 1;
 
@@ -694,45 +701,22 @@ public final class FwGuilds extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerBucketFillEvent(PlayerBucketFillEvent event){
-        if(ActiveGuildsSystem && (OpBypass || !event.getPlayer().isOp())){
+    public boolean InteractionOnGuildEvent(Player player, Block block){
+        if(ActiveGuildsSystem && (OpBypass || !player.isOp())){
             for(Map.Entry<String, Guild> guild : Guilds.entrySet()){
                 if(guild != null){
-                    if(!CanInteract(event.getBlock(), guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockZ())) {
-                        if(!(guild.getValue().Owner.equalsIgnoreCase(event.getPlayer().getName()) || guild.getValue().members.contains(event.getPlayer().getName()))){
-                            event.setCancelled(true);
-                            ActionBarMessage(event.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "Nie możesz stąd wziaść cieczy bo to teren gildii " + ChatColor.YELLOW + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
-                            return;
+                    if(!CanInteract(block, guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockZ())) {
+                        if(!(guild.getValue().Owner.equalsIgnoreCase(player.getName()) ||
+                                guild.getValue().members.contains(player.getName()))){
+
+                            ActionBarMessage(player, ChatColor.RED + "" + ChatColor.BOLD + "Nie mozesz tego tutaj zrobic bo to teren gildii " + guild.getValue().TeamColor + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
+                            return false;
                         }
                     }
                 }
             }
         }
-    }
-
-    @EventHandler
-    public void onPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event){
-        if(ActiveGuildsSystem && (OpBypass || !event.getPlayer().isOp())){
-            for(Map.Entry<String, Guild> guild : Guilds.entrySet()){
-                if(guild != null){
-                    if(!CanInteract(event.getBlock(), guild.getValue().CuboidBlockPosition.getBlockX(), guild.getValue().CuboidBlockPosition.getBlockZ())) {
-                        if(!(guild.getValue().Owner.equalsIgnoreCase(event.getPlayer().getName()) || guild.getValue().members.contains(event.getPlayer().getName()))){
-                            event.setCancelled(true);
-                            ActionBarMessage(event.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "Nie możesz tutaj wylać cieczy bo to teren gildii " + ChatColor.YELLOW + "" + ChatColor.BOLD  + guild.getKey() + ChatColor.RED + "" + ChatColor.BOLD  + "!");
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if(scoreboard == null) scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-
-        ReloadTeams();
+        return true;
     }
 
     public void ManageTeam(String gName, ChatColor gColor){
@@ -746,14 +730,14 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                 guildTeam = scoreboard.registerNewTeam(gName);
             }
 
-            guildTeam.setColor(gColor);
+            Objects.requireNonNull(guildTeam).setColor(gColor);
             guildTeam.setPrefix(ChatColor.GRAY + "" + ChatColor.BOLD + "[" + gColor + gName + ChatColor.GRAY + "" + ChatColor.BOLD + "] " + ChatColor.RESET);
             guildTeam.setCanSeeFriendlyInvisibles(true);
             guildTeam.setAllowFriendlyFire(true);
         }
         else{
-            scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-            if(scoreboard != null) ManageTeam(gName, gColor);
+            scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
+            ManageTeam(gName, gColor);
         }
     }
 
@@ -767,13 +751,14 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                 ManageTeam(guild.getKey(), ChatColor.getByChar(guild.getValue().TeamColor.replace("§", "")));
                 org.bukkit.scoreboard.Team guildTeam = scoreboard.getTeam(guild.getKey());
 
-                for(String gtn : guildTeam.getEntries()){
+                for(String gtn : Objects.requireNonNull(guildTeam).getEntries()){
                     guildTeam.removeEntry(gtn);
                 }
 
                 for(String pName : guild.getValue().members){
                     if(pl.getName().equalsIgnoreCase(pName)){
                         pl.setDisplayName(ChatColor.GRAY + "" + ChatColor.BOLD + "[" + guild.getValue().TeamColor + guild.getKey() + ChatColor.GRAY + "" + ChatColor.BOLD + "] " + ChatColor.RESET + pName);
+
                         //pl.setPlayerListName(ChatColor.GRAY + "" + ChatColor.BOLD + "[" + guild.getValue().TeamColor + guild.getKey() + ChatColor.GRAY + "" + ChatColor.BOLD + "] " + ChatColor.RESET + pName);
 
                         break outerloop;
@@ -819,7 +804,7 @@ public final class FwGuilds extends JavaPlugin implements Listener {
     }
 
     public void ReloadConfig() {
-        config = YamlConfiguration.loadConfiguration(cfile);
+        config = YamlConfiguration.loadConfiguration(configFile);
 
         HashMap<String, Double> DropsTmp = new HashMap<>();
         HashMap<String, Guild> GuildsTmp = new HashMap<>();
@@ -854,11 +839,11 @@ public final class FwGuilds extends JavaPlugin implements Listener {
 
     public void SaveConfigRemastered() {
         config.set("guilds", Guilds);
-        String cnf = null;
+        StringBuilder cnf = new StringBuilder();
 
         BufferedReader bufReader = new BufferedReader(new StringReader(config.saveToString()));
 
-        String line=null;
+        String line="";
         try
         {
             while( (line=bufReader.readLine()) != null )
@@ -868,17 +853,17 @@ public final class FwGuilds extends JavaPlugin implements Listener {
                     line = line.substring(0, indexOf);
                 }
 
-                cnf += line;
-                cnf += "\n";
+                cnf.append(line);
+                cnf.append("\n");
             }
         } catch(IOException ignored) {}
 
         try {
-            config.loadFromString(cnf);
+            config.loadFromString(cnf.toString());
         } catch (InvalidConfigurationException ignored) {}
 
         try {
-            config.save(cfile);
+            config.save(configFile);
         } catch (IOException e) {
             System.out.println("Error saving config file!");
         }
@@ -909,5 +894,14 @@ public final class FwGuilds extends JavaPlugin implements Listener {
             }
         }
         return sortedMap;
+    }
+
+    public void SendMessageToallPlayers(String msg){
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(msg);
+        }
+    }
+    public void ActionBarMessage(Player p, String msg){
+        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(msg));
     }
 }

@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="fwGuilds" />
+        <module name="Guilds" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="fwGuilds" target="1.8" />
+      <module name="Guilds" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

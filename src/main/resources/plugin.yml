@@ -1,11 +1,11 @@
 name: FwGuilds
-version: ${project.version}
+version: '${project.version}'
 main: fw.fwguilds.FwGuilds
-api-version: 1.16
-prefix: fwGuilds
+api-version: 1.18
 load: STARTUP
 authors: [ filipton ]
 description: Yeah
+website: filipton.xyz
 
 commands:
   fwguilds:
