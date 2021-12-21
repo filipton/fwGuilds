@@ -41,7 +41,7 @@ public class DeathAndDamageHandler implements Listener {
         event.getDrops().clear();
 
         event.getEntity().sendMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "UMARLES NA POZYCJI X: " + event.getEntity().getLocation().getBlockX() + ", Y: " + event.getEntity().getLocation().getBlockY() + ", Z: " + event.getEntity().getLocation().getBlockZ());
-        event.getEntity().getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 5, 1);
+        event.getEntity().getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 5, 1);
 
         if(FwGuilds.ActiveHalfDrop){
             Player player = event.getEntity();
